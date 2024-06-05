@@ -1,0 +1,10 @@
+NYU_imgs/*
+pattern_plots_inter/*
+visualize_NYU_LOMT.py
+*.png
+*.xlsx
+outfiles/*
+grad_cam/*
+plots_eeg_temp.ipynb
+*.jpeg
+*.jpg
