@@ -1,0 +1,86 @@
+##### conda activate MTLmetaenv
+### python main_intermediate_hooks.py --config_exp config/exp_multi_main_intermediate.yaml
+
+# 1. segmentsemantic
+# 2. depth_euclidean
+# 3. surface_normal
+# 4. edge_texture
+## 15_multi_seg_depth   T1T2
+## 16_multi_seg_sn      T1T3
+## 17_multi_seg_edge    T1T4
+## 18_multi_depth_sn   t2T3
+## 19_multi_depth_edge T2T4
+## 20_multi_sn_edge     t3T4
+## 5_multi_seg_sn_edge  T1T3T4
+## 10_multi_seg_depth_edge  T1T2T4
+## 7_depth_sn_edge          T2T3T4
+## 8_multi_seg_sn_depth  T1T2T3
+## 9_multi_seg_depth_sn_edge  T1T2T3T4
+
+
+'Experiment_name': 'Sparse_9_multi_seg_depth_sn_edge' 
+'dataset_name' : 'NYU'  ###### 'NYU', 'celebA'
+'backbone' : 'resnetd50' #### resnetd50,resnetd101
+'task_list': ['segmentsemantic','depth_euclidean','surface_normal', 'edge_texture']  ###  'surface_normal', 'edge_texture', 'segmentsemantic','depth_euclidean'
+'inter_hooks':    #### for resnet 50
+    'segmentsemantic': 'layer3[3].conv1'
+    'depth_euclidean': 'layer3[3].conv1'
+    'surface_normal': 'layer4[0].conv1'
+    'edge_texture': 'layer2[3].conv2'  
+
+# 'inter_hooks':    #### for resnet 101
+#     'segmentsemantic': 'layer3[4].conv2'
+#     'depth_euclidean': 'layer4[0].conv1'
+#     'surface_normal': 'layer4[0].conv1'
+#     'edge_texture': 'layer3[22].conv1'  
+
+'num_trials': 3
+    
+'setup': 'multitask' #### 'multitask', 'singletask'
+'group_sparsity' : True  ### keep this false 
+'sparsity_threshold': 80
+'checkpoint': False 
+'checkpoint_folder': '/proj/ltu_mtl/users/x_ricup/MTL_adaptive_results/inter/'
+'wandb_img_log': False
+'seg_classes_NYU': 38  #### or 41 old
+
+# COMBINE LOSSES
+'comb_loss' : 'uncertainity'   # 'uncertainity', 'sum', 'wt_sum'
+# BATCH SPECS
+'train_batch_size' : 16   
+'val_batch_size' : 16
+'test_batch_size' : 16
+# HYPERPARAMETERS
+'input_shape': 256
+'epochs' : 800
+'num_workers': 8
+'earlystop_patience': 15              ### keep greater than 10 since the scheduler patience is 10
+'task_earlystop_patience' : 15        ### keep greater than 10 since the scheduler patience is 10
+'input_img_channels': 3
+'sparsity_patience': 30
+# LOSS FUNCTION
+### seg loss function (for example)
+'seg_loss_fn': 'softCEloss'   #
+
+'optimizer': 'adam'    ### 'sgd', 'adamw' , 'adam' 
+'optimizer_params': 
+    'learning_rate': 0.0001
+    'betas': [0.9, 0.999]
+    'weight_decay' : 0.01
+    'penalty' : 'l1_l2' ####'l1'    'l1_l2', not being used
+    'lambda' : 0.0001   #### not being used 
+
+
+# BACKBONE OPTIMIZER PARAMETERS
+'bb_optimizer': 'adamw'    ### 'sgd', 'adamw' , 'adam'  #### in case of sparsity it is always ADAMW
+'bb_optimizer_params': 
+    'learning_rate': 0.0001 #####0.00001
+    'betas': [0.9, 0.999]
+    'weight_decay' : 0.01
+    'penalty' : 'l1_l2'  ####'l1'   'l1_l2', not being used
+    'lambda' : 0.00001 #### 
+    
+#### DATA 
+'num_input_ch' : 3
+'data_dir_NYU' : "/proj/ltu_mtl/dataset/NYU_dataset/NYUD_MT"
+'data_dir_celebA' : "/proj/ltu_mtl/dataset/celebA"

@@ -1,0 +1,78 @@
+####### interactive --gpus=1 -t 1:00:00  #### for one hour 
+##### screen -ls | grep Detached | cut -d. -f1 | awk '{print $1}' | xargs kill
+
+
+##### conda activate MTLmetaenv
+### python main_multi_trials.py --config_exp config/exp_single_mtl.yaml
+
+# 1. segmentsemantic
+# 2. depth_euclidean
+# 3. surface_normal
+# 4. edge_texture
+## 5. multi_seg_depth
+## 6. multi_seg_sn
+## 7. multi_sn_depth
+## 8. multi_seg_sn_depth
+
+###
+## Exp7_multi_depth_sn_edge_res100
+## Exp8_multi_seg_depth_sn_res100
+## Exp9_multi_seg_depth_sn_edge_res100
+
+
+
+'Experiment_name': 'Exp9_multi_seg_depth_sn_edge_800' 
+'dataset_name' : 'NYU'  ###### 'NYU', 'celebA'
+'task_list': ['segmentsemantic', 'depth_euclidean','surface_normal', 'edge_texture']  ###  
+### 'surface_normal', 'edge_texture', 'segmentsemantic','depth_euclidean'
+'setup': 'singletask' #### 'multitask', 'singletask'
+'group_sparsity' : True
+'sparsity_threshold': 80
+'backbone' : 'resnetd50' #### resnetd50,resnetd101
+'checkpoint': False 
+'checkpoint_folder': '/proj/ltu_mtl/users/x_ricup/MTL_adaptive_results/inter/'   ###'/proj/ltu_mtl/users/x_ricup/MTL_adaptive_results/meta/NYU/'   '/proj/ltu_mtl/users/x_ricup/MTL_adaptive_results/inter/resnetd101/'
+'wandb_img_log': False
+'num_trials': 3
+# 'lambda_list' : [0, 0.000001, 0.00001, 0.0001]
+'seg_classes_NYU': 38  #### or 41 old
+### [0.001, 0.0001, 0.00001, 0.000001, 0.0000001]
+##### [0.001, 0.0001, 0.00001, 0.000001]
+# COMBINE LOSSES
+'comb_loss' : 'uncertainity'   # 'uncertainity', 'sum', 'wt_sum'
+# BATCH SPECS
+'train_batch_size' : 16   
+'val_batch_size' : 16
+'test_batch_size' : 16
+# HYPERPARAMETERS
+'input_shape': 256
+'epochs' : 800
+'num_workers': 8
+'earlystop_patience': 15              ### keep greater than 10 since the scheduler patience is 10
+'task_earlystop_patience' : 15        ### keep greater than 10 since the scheduler patience is 10
+'input_img_channels': 3
+'sparsity_patience': 30
+# LOSS FUNCTION
+### seg loss function (for example)
+'seg_loss_fn': 'softCEloss'   ####  dice, Tversky,  softCEloss, Focal
+#  INITIAL NON SPARSE OPTIMIZER PARAMETERS 
+'optimizer': 'adam'    ### 'sgd', 'adamw' , 'adam' 
+'optimizer_params': 
+    'learning_rate': 0.0001
+    'betas': [0.9, 0.999]
+    'weight_decay' : 0.01
+    'penalty' : 'l1_l2' ####'l1'    'l1_l2'
+    'lambda' : 0.001   #### not being used 
+
+# BACKBONE OPTIMIZER PARAMETERS
+'bb_optimizer': 'adam'    ### 'sgd', 'adamw' , 'adam'  #### in case of sparsity it is always ADAMW, the choice dpoes not matters 
+'bb_optimizer_params': 
+    'learning_rate': 0.00001 #####0.00001
+    'betas': [0.9, 0.999]
+    'weight_decay' : 0.1
+    'penalty' : 'l1_l2'  ####'l1'   'l1_l2'
+    'lambda' : 0.001 #### for sparsity 
+    
+#### DATA 
+'num_input_ch' : 3
+'data_dir_NYU' : "/proj/ltu_mtl/dataset/NYU_dataset/NYUD_MT"
+'data_dir_celebA' : "/proj/ltu_mtl/dataset/celebA"

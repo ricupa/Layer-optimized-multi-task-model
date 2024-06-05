@@ -1,0 +1,91 @@
+##### conda activate MTLmetaenv
+### python main_intermediate_hooks.py --config_exp config/exp_multi_main_intermediate_celebA.yaml
+
+# 1_single_segmentsemantic -
+# 2_single_class_lipstick
+# 3_single_class_male -
+# 4_single_class_eyebrows -
+# 5_single_class_smile -
+# 6_single_class_highcheekbones -
+# 7_single_class_biglips
+# 8_multi_seg_male_eyebrows_smile_lipstick_cheekbones_biglips,    (all)
+# 9_multi_male_eyebrows_smile_lipstick_cheekbones_biglips    (all classification, add segmentation in meta test)
+# 10_multi_seg_male_smile_eyebrows (add other tasks during test)
+# ----
+# 11_multi_male_lipstick  
+# 12_multi_male_lipstick_smile       
+# 13_multi_seg_male_cheekbones
+# 14_multi_seg_eyebrow_biglips
+
+'Experiment_name': '14_multi_seg_eyebrow_biglips' 
+'dataset_name' : 'celebA'  ###### 'NYU', 'celebA'
+'task_list': ['segmentsemantic', 'class_eyebrows' , 'class_biglips']  
+###   'class_male' , 'class_eyebrows', 'class_smile', 'segmentsemantic', 'class_biglips', 'class_highcheekbones', 'class_lipstick'
+
+'inter_hooks':    #### for resnet 50
+    'class_biglips': 'layer4[0].conv1'
+    'class_eyebrows': 'layer4[2].conv3'    
+    'class_highcheekbones': 'layer3[5].conv1'
+    'class_lipstick': 'layer3[0].conv2'  
+    'class_male': 'layer3[5].conv1' 
+    'segmentsemantic': 'layer3[5].conv1' 
+    'class_smile': 'layer3[4].conv3' 
+
+
+# 'inter_hooks':    #### for resnet 101
+#     'segmentsemantic': 'layer3[4].conv2'
+#     'depth_euclidean': 'layer4[0].conv1'
+#     'surface_normal': 'layer4[0].conv1'
+#     'edge_texture': 'layer3[22].conv1'  
+
+# 'setup': 'singletask' #### 'multitask', 'singletask'
+'group_sparsity' : False
+'sparsity_threshold': 80
+'backbone' : 'resnetd50' #### resnetd50,resnetd101
+'checkpoint': False 
+'checkpoint_folder': '/proj/ltu_mtl/users/x_ricup/MTL_adaptive_results/inter/'
+'wandb_img_log': False
+'num_trials': 3
+
+# COMBINE LOSSES
+'comb_loss' : 'uncertainity'   # 'uncertainity', 'sum', 'wt_sum'
+# BATCH SPECS
+'train_batch_size' : 64   
+'val_batch_size' : 64
+'test_batch_size' : 64
+# HYPERPARAMETERS
+
+'input_shape': 256
+'epochs' : 300
+'num_workers': 8
+'earlystop_patience': 15              ### keep greater than 10 since the scheduler patience is 10
+'task_earlystop_patience' : 15        ### keep greater than 10 since the scheduler patience is 10
+'input_img_channels': 3
+'sparsity_patience': 30
+
+# LOSS FUNCTION
+### seg loss function (for example)
+'seg_loss_fn': 'softCEloss'   ####  dice, Tversky,  softCEloss, Focal
+
+#  INITIAL NON SPARSE OPTIMIZER PARAMETERS
+'optimizer': 'adam'    ### 'sgd', 'adamw' , 'adam' 
+'optimizer_params': 
+    'learning_rate': 0.0001
+    'betas': [0.9, 0.999]
+    'weight_decay' : 0.1
+    'penalty' : 'l1_l2'
+    'lambda' : 0.00001   #### not being used 
+
+# BACKBONE OPTIMIZER PARAMETERS
+'bb_optimizer': 'adam'    ### 'sgd', 'adamw' , 'adam'  #### in case of sparsity it is always ADAMW
+'bb_optimizer_params': 
+    'learning_rate': 0.0001 #####0.00001
+    'betas': [0.9, 0.999]
+    'weight_decay' : 0.1
+    'penalty' : 'l1_l2'    ###### l1_l2  , l1
+    'lambda' : 0.0001 #### for sparsity 
+    
+#### DATA 
+'num_input_ch' : 3
+'data_dir_NYU' : "/proj/ltu_mtl/dataset/NYU_dataset/NYUD_MT"
+'data_dir_celebA' : "/proj/ltu_mtl/dataset/celebA"
